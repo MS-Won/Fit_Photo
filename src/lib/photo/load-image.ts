@@ -32,9 +32,35 @@ export function downscaleSize(w: number, h: number, maxPixels = MAX_SOURCE_PIXEL
   return { width: Math.floor(w * s), height: Math.floor(h * s) };
 }
 
-function formatOf(file: FileLike): string {
-  const ext = file.name.split('.').pop()?.toUpperCase() ?? '';
-  return ext === 'JPEG' ? 'JPG' : ext || file.type.replace('image/', '').toUpperCase();
+export function formatOf(file: FileLike): string {
+  const dotIndex = file.name.lastIndexOf('.');
+  const ext = dotIndex >= 0 ? file.name.slice(dotIndex + 1).toUpperCase() : '';
+  if (ext) return ext === 'JPEG' ? 'JPG' : ext;
+  const subtype = file.type.replace('image/', '').toUpperCase();
+  return subtype === 'JPEG' ? 'JPG' : subtype;
+}
+
+export function bitmapOptions(naturalW: number, naturalH: number, maxPixels = MAX_SOURCE_PIXELS): ImageBitmapOptions {
+  if (naturalW * naturalH <= maxPixels) return { imageOrientation: 'from-image' };
+  const { width, height } = downscaleSize(naturalW, naturalH, maxPixels);
+  return { imageOrientation: 'from-image', resizeWidth: width, resizeHeight: height, resizeQuality: 'high' };
+}
+
+function readNaturalSize(blob: Blob): Promise<{ width: number; height: number }> {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const size = { width: img.naturalWidth, height: img.naturalHeight };
+      URL.revokeObjectURL(url);
+      resolve(size);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('image load failed'));
+    };
+    img.src = url;
+  });
 }
 
 export async function loadImageFile(file: File): Promise<LoadedImage> {
@@ -51,23 +77,36 @@ export async function loadImageFile(file: File): Promise<LoadedImage> {
     }
   }
 
-  let bitmap: ImageBitmap;
+  let naturalWidth: number;
+  let naturalHeight: number;
   try {
-    bitmap = await createImageBitmap(blob, { imageOrientation: 'from-image' });
+    const size = await readNaturalSize(blob);
+    naturalWidth = size.width;
+    naturalHeight = size.height;
   } catch {
     throw new LoadImageError('decode-failed');
   }
 
-  const { width, height } = downscaleSize(bitmap.width, bitmap.height);
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new LoadImageError('decode-failed');
-  ctx.drawImage(bitmap, 0, 0, width, height);
-  const original = { name: file.name, bytes: file.size, format: formatOf(file), width: bitmap.width, height: bitmap.height };
-  bitmap.close();
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(blob, bitmapOptions(naturalWidth, naturalHeight));
+  } catch {
+    throw new LoadImageError('decode-failed');
+  }
 
-  const url = URL.createObjectURL(await canvasToBlob(canvas, 'image/jpeg', 0.92));
-  return { canvas, url, width, height, original };
+  try {
+    const { width, height } = downscaleSize(bitmap.width, bitmap.height);
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new LoadImageError('decode-failed');
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    const original = { name: file.name, bytes: file.size, format: formatOf(file), width: naturalWidth, height: naturalHeight };
+
+    const url = URL.createObjectURL(await canvasToBlob(canvas, 'image/jpeg', 0.92));
+    return { canvas, url, width, height, original };
+  } finally {
+    bitmap.close();
+  }
 }
