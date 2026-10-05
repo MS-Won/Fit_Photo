@@ -1,5 +1,8 @@
 const JFIF_ID = [0x4a, 0x46, 0x49, 0x46, 0x00]; // "JFIF\0"
 
+/** Length of the JFIF APP0 segment inserted by setJpegDpi */
+export const JFIF_APP0_BYTES = 18;
+
 function hasJfifApp0(b: Uint8Array): boolean {
   return b[2] === 0xff && b[3] === 0xe0 && JFIF_ID.every((v, i) => b[6 + i] === v);
 }
