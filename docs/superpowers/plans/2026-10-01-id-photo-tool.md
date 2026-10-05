@@ -20,7 +20,7 @@
 - `src/lib/**`와 `src/data/**`는 `@/` 별칭 없이 상대 경로로만 import한다 (빌드 스크립트가 tsx로 직접 실행하기 때문).
 - 이번 범위 제외: 로그인, 결제, 다국어, 다크모드 토글, 사용자 프리셋 저장, 얼굴 자동 인식, 배경 제거, 인화용 배치 출력, 홈 화면 도해 갤러리.
 - UI 문구는 한국어.
-- Node 20 이상.
+- Node 22 LTS (22.12 이상). 로컬은 nvm-windows로 22.14.0 사용.
 
 ## File Structure
 
@@ -677,7 +677,7 @@ import { presetToTarget, byteLimits, checkResult, formatBytes } from './target';
 import { PHOTO_PRESETS } from '../presets';
 
 const passport = PHOTO_PRESETS.find((p) => p.slug === 'passport')!;
-const driver = PHOTO_PRESETS.find((p) => p.slug === 'driver-license')!;
+const qnet = PHOTO_PRESETS.find((p) => p.slug === 'qnet')!;
 const gosi = PHOTO_PRESETS.find((p) => p.slug === 'gosi')!;
 
 describe('presetToTarget', () => {
@@ -686,8 +686,8 @@ describe('presetToTarget', () => {
   });
 
   it('uses recommended pixels for range presets', () => {
-    const t = presetToTarget(driver);
-    expect([t.widthPx, t.heightPx]).toEqual([350, 450]);
+    const t = presetToTarget(qnet);
+    expect([t.widthPx, t.heightPx]).toEqual([300, 400]);
   });
 });
 
@@ -2456,7 +2456,7 @@ git commit -m "feat: use AI-generated sample portrait in spec diagrams"
 
 1. GitHub에 비공개 저장소를 만들고 push (`git remote add origin <url>` → `git push -u origin main`)
 2. Cloudflare 대시보드 → Workers & Pages → Pages → Connect to Git → 저장소 선택
-3. Build command: `npm run build` / Output directory: `out` / 환경 변수: `NODE_VERSION=20`, `NEXT_PUBLIC_SITE_URL=https://<배포 주소>`
+3. Build command: `npm run build` / Output directory: `out` / 환경 변수: `NODE_VERSION=22`, `NEXT_PUBLIC_SITE_URL=https://<배포 주소>`
 4. 배포 후 `https://<배포 주소>/photo/passport/` 접속 확인
 
 사이트 이름과 도메인이 정해지면 `src/config/site.ts`의 `name`과 Cloudflare의 `NEXT_PUBLIC_SITE_URL`만 바꿔 재배포한다.
