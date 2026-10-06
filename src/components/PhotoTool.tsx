@@ -77,13 +77,13 @@ export function PhotoTool({ target, guides, fileName, eventLabel }: Props) {
 
       {!image && (
         <label
-          className="flex h-56 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 text-center hover:border-blue-500"
+          className="relative flex h-56 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-300 text-center hover:border-blue-500 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500"
           onDragOver={(e) => e.preventDefault()}
           onDrop={(e) => { e.preventDefault(); onFile(e.dataTransfer.files[0]); }}
         >
           <span className="font-medium">사진을 끌어다 놓거나 눌러서 선택하세요</span>
           <span className="text-xs text-slate-500">JPG · PNG · WEBP · HEIC</span>
-          <input type="file" accept="image/*,.heic,.heif" className="hidden" onChange={(e) => onFile(e.target.files?.[0])} />
+          <input type="file" accept="image/*,.heic,.heif" className="absolute h-px w-px overflow-hidden opacity-0" onChange={(e) => onFile(e.target.files?.[0])} />
         </label>
       )}
 
