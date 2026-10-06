@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "samples": "tsx scripts/build-samples.ts",
+    "prebuild": "npm run samples",
     "start": "npx serve out",
     "lint": "next lint",
     "test": "vitest run",

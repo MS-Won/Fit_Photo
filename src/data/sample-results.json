@@ -1,0 +1,31 @@
+{
+  "original": {
+    "bytes": 658
+  },
+  "results": {
+    "passport": {
+      "bytes": 17971,
+      "widthPx": 413,
+      "heightPx": 531,
+      "quality": 1
+    },
+    "driver-license": {
+      "bytes": 17971,
+      "widthPx": 413,
+      "heightPx": 531,
+      "quality": 1
+    },
+    "qnet": {
+      "bytes": 12809,
+      "widthPx": 300,
+      "heightPx": 400,
+      "quality": 1
+    },
+    "toeic": {
+      "bytes": 4601,
+      "widthPx": 115,
+      "heightPx": 150,
+      "quality": 1
+    }
+  }
+}
