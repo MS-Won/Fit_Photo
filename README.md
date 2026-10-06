@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 증명사진 규격 맞춤기
 
-## Getting Started
+기관(여권, 운전면허, Q-net, 토익)을 고르면 그 규격(픽셀, 실물 크기, 용량, 머리 비율)에 맞춰 증명사진 JPG를 브라우저에서 만들어 주는 정적 웹사이트. Next.js App Router 정적 내보내기(`output: 'export'`)로 빌드되며, 이미지 처리는 전부 브라우저 캔버스에서 일어난다 — **사진은 서버로 전송되지 않는다.**
 
-First, run the development server:
+- 기관 규격 데이터: `src/lib/presets/data.ts` (공식 출처로 검증된 것만 `verifiedAt`에 날짜가 들어가고, 그것만 사이트에 노출된다)
+- 크롭/용량 맞춤 로직: `src/lib/photo/*`
+- 사이트 이름/설명: `src/config/site.ts`
+- 자세한 설계 배경: `docs/superpowers/specs/2026-10-01-id-photo-tool-design.md`, 구현 계획: `docs/superpowers/plans/2026-10-01-id-photo-tool.md`
+
+## 요구 사항
+
+Node 22 LTS (22.12 이상).
+
+## 개발
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[http://localhost:3000](http://localhost:3000) 에서 확인.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 테스트
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test        # vitest run
+npm run test:watch
+```
 
-## Learn More
+## 빌드
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`prebuild` 단계에서 `scripts/build-samples.ts`가 예시 사진을 기관별로 실제 인코딩해 `src/data/sample-results.json`에 용량을 기록한다 (규격 도해에 꾸며낸 숫자를 쓰지 않기 위함). 결과는 `out/`에 정적 파일로 나온다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 배포
 
-## Deploy on Vercel
+Cloudflare Pages 기준:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Build command: `npm run build`
+- Output directory: `out`
+- 환경 변수: `NODE_VERSION=22`, `NEXT_PUBLIC_SITE_URL=https://<배포 주소>` (선택: `NEXT_PUBLIC_GA_ID`, `NEXT_PUBLIC_ADSENSE_CLIENT`, `NEXT_PUBLIC_ADSENSE_SLOT_TOOL`, `NEXT_PUBLIC_ADSENSE_SLOT_CONTENT`)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+배포 전 사용자가 직접 해야 하는 단계(AI 예시 인물 교체, Cloudflare 연결, GA/서치콘솔 등록)는 플랜의 Task 9에 정리되어 있다.
